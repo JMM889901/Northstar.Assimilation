@@ -1,0 +1,75 @@
+global function GamemodeAssim_Init
+
+void function GamemodeAssim_Init()
+{
+	SetSpawnpointGamemodeOverride( FFA )
+
+	SetShouldUseRoundWinningKillReplay( true )
+	ClassicMP_ForceDisableEpilogue( true )
+	SetLoadoutGracePeriodEnabled( true ) // prevent modifying loadouts with grace period
+	SetWeaponDropsEnabled( false )
+	Riff_ForceTitanAvailability( eTitanAvailability.Never )
+	Riff_ForceBoostAvailability( eBoostAvailability.Disabled )
+	
+	AddCallback_OnPlayerRespawned( OnPlayerRespawned )
+	AddCallback_OnPlayerKilled( OnPlayerKilled )
+	
+	AddCallback_GameStateEnter( eGameState.WinnerDetermined, OnWinnerDetermined )
+	
+}
+
+void function OnPlayerRespawned( entity player )
+{
+	thread OnPlayerRespawned_Threaded( player )
+}
+
+void function OnPlayerRespawned_Threaded( entity player )
+{
+	// bit of a hack, need to rework earnmeter code to have better support for completely disabling it
+	// rn though this just waits for earnmeter code to set the mode before we set it back
+	WaitFrame()
+	if ( IsValid( player ) )
+		PlayerEarnMeter_SetMode( player, eEarnMeterMode.DISABLED )
+}
+
+void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
+{
+	print(victim)
+	print(attacker)
+    if ( !victim.IsPlayer() || !attacker.IsPlayer() || GetGameState() != eGameState.Playing )
+	{
+        return
+	}
+	if ( attacker == victim ) // suicide
+	{
+		string message = victim.GetPlayerName() + " committed suicide."
+		foreach ( entity player in GetPlayerArray() )
+			SendHudMessage( player, message, -1, 0.4, 255, 0, 0, 0, 0, 3, 0.15 )
+			
+	}
+	else 
+	{
+            AddTeamScore( attacker.GetTeam(), 1 )
+            attacker.AddToPlayerGameStat( PGS_ASSAULT_SCORE, 1 )
+            foreach ( entity weapon in attacker.GetMainWeapons() )
+                attacker.TakeWeaponNow( weapon.GetWeaponClassName() )
+    
+            foreach ( entity weapon in attacker.GetOffhandWeapons() )
+                attacker.TakeWeaponNow( weapon.GetWeaponClassName() )
+            
+	    attacker.GiveOffhandWeapon( victim.GetOffhandWeapon( OFFHAND_MELEE ).GetWeaponClassName(), OFFHAND_MELEE )
+            attacker.GiveOffhandWeapon( victim.GetOffhandWeapon( OFFHAND_LEFT ).GetWeaponClassName(), OFFHAND_LEFT )
+ 	    attacker.GiveOffhandWeapon( victim.GetOffhandWeapon( OFFHAND_RIGHT ).GetWeaponClassName(), OFFHAND_RIGHT )
+	    foreach ( entity weapon in victim.GetMainWeapons() )
+		{
+		attacker.GiveWeapon( weapon.GetWeaponClassName(), weapon.GetMods() )
+		}
+}
+}
+
+
+void function OnWinnerDetermined()
+{
+	SetRespawnsEnabled( false )
+	SetKillcamsEnabled( false )
+}
