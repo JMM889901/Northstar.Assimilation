@@ -1,7 +1,7 @@
 {
 	"Name" : "Assimilate",
 	"Description" : "Assimilate",
-	"Version": "0.3.0",
+	"Version": "0.3.5",
 	"LoadPriority": 1,
 
 	"Scripts": [
@@ -9,13 +9,13 @@
 			"Path": "sh_steal.gnut",
 			"RunOn": "MP",
 			"ClientCallback": {
-				"After": "Stealing_Init"
+				"After": "WeaponStealing_Init"
 			},
 
 			"ServerCallback": {
-				"After": "Stealing_Init_Init"
+				"After": "WeaponStealing_Init"
 			}
-		},
+		}
 	],
 
 	"Localisation": [
