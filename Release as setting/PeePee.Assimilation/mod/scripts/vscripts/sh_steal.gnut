@@ -1,0 +1,60 @@
+global function WeaponStealing_Init
+
+void function Stealing_Init() {
+	PrecacheModel( $"models/titans/buddy/titan_buddy.mdl" )
+	PrecacheModel( $"models/weapons/arms/buddypov.mdl" )
+	PrecacheParticleSystem( $"P_BT_eye_SM" )
+
+	AddPrivateMatchModeSettingEnum("#MODE_SETTING_CATEGORY_STEALING", "steal_abilities", ["#SETTING_DISABLED", "#SETTING_ENABLED"], "0")
+	AddPrivateMatchModeSettingEnum("#MODE_SETTING_CATEGORY_STEALING", "steal_weapons", ["#SETTING_DISABLED", "#SETTING_ENABLED"], "0")
+
+	#if SERVER
+		AddCallback_OnPlayerKilled(StealWeapons)
+	#endif
+}
+
+// Enabled Functions
+	bool function StealAbilitiesEnabled() {
+		return GetCurrentPlaylistVarInt("steal_abilities", 0) == 1
+	}
+
+	bool function StealWeaponsEnabled() {
+		return GetCurrentPlaylistVarInt("steal_weapons", 0) == 1
+	}
+
+#if SERVER
+	void function StealWeapons( entity victim, entity attacker, var damageInfo )
+	{
+    if ( !victim.IsPlayer() || !attacker.IsPlayer() || GetGameState() != eGameState.Playing )
+	{
+        return
+	}
+	if ( attacker == victim ) // suicide
+	{
+		string message = victim.GetPlayerName() + " committed suicide."
+		foreach ( entity player in GetPlayerArray() )
+			SendHudMessage( player, message, -1, 0.4, 255, 0, 0, 0, 0, 3, 0.15 )
+			
+	}
+	else 
+	{
+		if (StealWeaponsEnabled()){
+				AddTeamScore( attacker.GetTeam(), 1 )
+				attacker.AddToPlayerGameStat( PGS_ASSAULT_SCORE, 1 )
+				foreach ( entity weapon in attacker.GetMainWeapons() )
+					attacker.TakeWeaponNow( weapon.GetWeaponClassName() )
+				foreach ( entity weapon in victim.GetMainWeapons() )
+				{
+					attacker.GiveWeapon( weapon.GetWeaponClassName(), weapon.GetMods() )
+				}
+    }
+		if (StealAbilitiesEnabled()){
+        foreach ( entity weapon in attacker.GetOffhandWeapons() )
+			attacker.TakeWeaponNow( weapon.GetWeaponClassName() )
+	    attacker.GiveOffhandWeapon( victim.GetOffhandWeapon( OFFHAND_MELEE ).GetWeaponClassName(), OFFHAND_MELEE )
+		attacker.GiveOffhandWeapon( victim.GetOffhandWeapon( OFFHAND_LEFT ).GetWeaponClassName(), OFFHAND_LEFT )
+ 	    attacker.GiveOffhandWeapon( victim.GetOffhandWeapon( OFFHAND_RIGHT ).GetWeaponClassName(), OFFHAND_RIGHT )
+		}
+}
+}
+#endif
