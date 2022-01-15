@@ -1,10 +1,6 @@
 global function WeaponStealing_Init
 
 void function Stealing_Init() {
-	PrecacheModel( $"models/titans/buddy/titan_buddy.mdl" )
-	PrecacheModel( $"models/weapons/arms/buddypov.mdl" )
-	PrecacheParticleSystem( $"P_BT_eye_SM" )
-
 	AddPrivateMatchModeSettingEnum("#MODE_SETTING_CATEGORY_STEALING", "steal_abilities", ["#SETTING_DISABLED", "#SETTING_ENABLED"], "0")
 	AddPrivateMatchModeSettingEnum("#MODE_SETTING_CATEGORY_STEALING", "steal_weapons", ["#SETTING_DISABLED", "#SETTING_ENABLED"], "0")
 
