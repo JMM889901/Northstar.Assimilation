@@ -1,6 +1,6 @@
 global function WeaponStealing_Init
 
-void function Stealing_Init() {
+void function WeaponStealing_Init() {
 	AddPrivateMatchModeSettingEnum("#MODE_SETTING_CATEGORY_STEALING", "steal_abilities", ["#SETTING_DISABLED", "#SETTING_ENABLED"], "0")
 	AddPrivateMatchModeSettingEnum("#MODE_SETTING_CATEGORY_STEALING", "steal_weapons", ["#SETTING_DISABLED", "#SETTING_ENABLED"], "0")
 
