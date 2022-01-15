@@ -1,0 +1,45 @@
+global function Sh_GamemodeAssim_Init
+
+global const string GAMEMODE_Assim = "Assimilation"
+
+struct {
+} file
+
+void function Sh_GamemodeAssim_Init()
+{
+	// create custom gamemode
+	AddCallback_OnCustomGamemodesInit( CreateGamemodeAssim )
+}
+
+void function CreateGamemodeGG()
+{
+	GameMode_Create( GAMEMODE_Assim )
+	GameMode_SetName( GAMEMODE_Assim, "#GAMEMODE_Assim" )
+	GameMode_SetDesc( GAMEMODE_Assim, "Kill enemies to take their loadouts" )
+	GameMode_SetGameModeAnnouncement( GAMEMODE_Assim, "ffa_modeDesc" )
+	GameMode_SetDefaultTimeLimits( GAMEMODE_Assim, 10, 0.0 )
+	GameMode_AddScoreboardColumnData( GAMEMODE_Assim, "#SCOREBOARD_SCORE", PGS_ASSAULT_SCORE, 2 )
+	GameMode_AddScoreboardColumnData( GAMEMODE_Assim, "#SCOREBOARD_PILOT_KILLS", PGS_PILOT_KILLS, 2 )
+	GameMode_SetColor( GAMEMODE_Assim, [147, 204, 57, 255] )
+	
+	AddPrivateMatchMode( GAMEMODE_Assim ) // add to private lobby modes
+	
+	
+	// set this to the number of guns
+	GameMode_SetDefaultScoreLimits( GAMEMODE_Assim, 50, 0 )
+	
+	#if SERVER
+		GameMode_AddServerInit( GAMEMODE_Assim, GamemodeAssim_Init )
+		GameMode_AddServerInit( GAMEMODE_Assim, GamemodeFFAShared_Init )
+		GameMode_SetPilotSpawnpointsRatingFunc( GAMEMODE_Assim, RateSpawnpoints_Generic )
+		GameMode_SetTitanSpawnpointsRatingFunc( GAMEMODE_Assim, RateSpawnpoints_Generic )
+	#elseif CLIENT
+		GameMode_AddClientInit( GAMEMODE_Assim, ClGamemodeAssim_Init )
+		GameMode_AddClientInit( GAMEMODE_Assim, GamemodeFFAShared_Init )
+		GameMode_AddClientInit( GAMEMODE_Assim, ClGamemodeFFA_Init )
+	#endif
+	#if !UI
+		GameMode_SetScoreCompareFunc( GAMEMODE_Assim, CompareAssaultScore )
+		GameMode_AddSharedInit( GAMEMODE_Assim, GamemodeFFA_Dialogue_Init )
+	#endif
+}
