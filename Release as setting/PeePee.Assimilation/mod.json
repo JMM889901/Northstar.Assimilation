@@ -1,0 +1,24 @@
+{
+	"Name" : "Assimilate",
+	"Description" : "Assimilate",
+	"Version": "0.3.0",
+	"LoadPriority": 1,
+
+	"Scripts": [
+		{
+			"Path": "sh_steal.gnut",
+			"RunOn": "MP",
+			"ClientCallback": {
+				"After": "Stealing_Init"
+			},
+
+			"ServerCallback": {
+				"After": "Stealing_Init_Init"
+			}
+		},
+	],
+
+	"Localisation": [
+		"resource/assimilation_localisation_%language%.txt"
+	]
+}
