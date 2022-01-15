@@ -1,0 +1,10 @@
+"lang"
+{
+	"Language" "english"
+	"Tokens"
+	{
+		"MODE_SETTING_CATEGORY_RANDOMISER" "Randomiser"
+		"steal_abilities" "Steal ability and grenade on kill"
+		"steal_weapons" "Steal weapons on kill"
+	}
+}
