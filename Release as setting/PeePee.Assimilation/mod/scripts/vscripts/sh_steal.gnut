@@ -32,7 +32,7 @@ void function WeaponStealing_Init() {
 			SendHudMessage( player, message, -1, 0.4, 255, 0, 0, 0, 0, 3, 0.15 )
 			
 	}
-	else 
+	elif (IsTitan(attacker) != 0)
 	{
 		if (StealWeaponsEnabled()){
 				AddTeamScore( attacker.GetTeam(), 1 )
@@ -43,13 +43,13 @@ void function WeaponStealing_Init() {
 				{
 					attacker.GiveWeapon( weapon.GetWeaponClassName(), weapon.GetMods() )
 				}
-    }
+    					}
 		if (StealAbilitiesEnabled()){
-        foreach ( entity weapon in attacker.GetOffhandWeapons() )
+        	foreach ( entity weapon in attacker.GetOffhandWeapons() )
 			attacker.TakeWeaponNow( weapon.GetWeaponClassName() )
-	    attacker.GiveOffhandWeapon( victim.GetOffhandWeapon( OFFHAND_MELEE ).GetWeaponClassName(), OFFHAND_MELEE )
+	    	attacker.GiveOffhandWeapon( victim.GetOffhandWeapon( OFFHAND_MELEE ).GetWeaponClassName(), OFFHAND_MELEE )
 		attacker.GiveOffhandWeapon( victim.GetOffhandWeapon( OFFHAND_LEFT ).GetWeaponClassName(), OFFHAND_LEFT )
- 	    attacker.GiveOffhandWeapon( victim.GetOffhandWeapon( OFFHAND_RIGHT ).GetWeaponClassName(), OFFHAND_RIGHT )
+ 	    	attacker.GiveOffhandWeapon( victim.GetOffhandWeapon( OFFHAND_RIGHT ).GetWeaponClassName(), OFFHAND_RIGHT )
 		}
 }
 }
