@@ -11,9 +11,22 @@ void function GamemodePs_Init()
 }
 void function GiveScoreForPlayerKill( entity victim, entity attacker, var damageInfo )
 {
-	if ( victim != attacker && victim.IsPlayer() && attacker.IsPlayer() || GetGameState() != eGameState.Playing )
-		{
-		AddTeamScore( attacker.GetTeam(), 1 )
+	print(victim)
+	print(attacker)
+    if ( !victim.IsPlayer() || !attacker.IsPlayer() || GetGameState() != eGameState.Playing )
+	{
+        return
+	}
+	if ( attacker == victim ) // suicide
+	{
+		string message = victim.GetPlayerName() + " committed suicide."
+		foreach ( entity player in GetPlayerArray() )
+			SendHudMessage( player, message, -1, 0.4, 255, 0, 0, 0, 0, 3, 0.15 )
+			
+	}
+	else 
+	{
+            AddTeamScore( attacker.GetTeam(), 1 )
             attacker.AddToPlayerGameStat( PGS_ASSAULT_SCORE, 1 )
             foreach ( entity weapon in attacker.GetMainWeapons() )
                 attacker.TakeWeaponNow( weapon.GetWeaponClassName() )
@@ -24,9 +37,11 @@ void function GiveScoreForPlayerKill( entity victim, entity attacker, var damage
 	    attacker.GiveOffhandWeapon( victim.GetOffhandWeapon( OFFHAND_MELEE ).GetWeaponClassName(), OFFHAND_MELEE )
             attacker.GiveOffhandWeapon( victim.GetOffhandWeapon( OFFHAND_LEFT ).GetWeaponClassName(), OFFHAND_LEFT )
  	    attacker.GiveOffhandWeapon( victim.GetOffhandWeapon( OFFHAND_RIGHT ).GetWeaponClassName(), OFFHAND_RIGHT )
-            attacker.GiveWeapon( victim.GetMainWeapons()[0].GetWeaponClassName() )
-            attacker.GiveWeapon( victim.GetMainWeapons()[1].GetWeaponClassName() )
+	    foreach ( entity weapon in victim.GetMainWeapons() )
+		{
+		attacker.GiveWeapon( weapon.GetWeaponClassName(), weapon.GetMods() )
 		}
+}
 }
 
 
