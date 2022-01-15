@@ -53,11 +53,6 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 		foreach ( entity player in GetPlayerArray() )
 			SendHudMessage( player, message, -1, 0.4, 255, 0, 0, 0, 0, 3, 0.15 )
 			
-		if ( GameRules_GetTeamScore( victim.GetTeam() ) != 0 )
-		{
-			AddTeamScore( victim.GetTeam(), -1 ) // get absolutely fucking destroyed lol
-			victim.AddToPlayerGameStat( PGS_ASSAULT_SCORE, -1 )
-		}
 	}
 	else 
 	{
@@ -72,8 +67,10 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 	    attacker.GiveOffhandWeapon( victim.GetOffhandWeapon( OFFHAND_MELEE ).GetWeaponClassName(), OFFHAND_MELEE )
             attacker.GiveOffhandWeapon( victim.GetOffhandWeapon( OFFHAND_LEFT ).GetWeaponClassName(), OFFHAND_LEFT )
  	    attacker.GiveOffhandWeapon( victim.GetOffhandWeapon( OFFHAND_RIGHT ).GetWeaponClassName(), OFFHAND_RIGHT )
-            attacker.GiveWeapon( victim.GetMainWeapons()[0].GetWeaponClassName() )
-            attacker.GiveWeapon( victim.GetMainWeapons()[1].GetWeaponClassName() )
+	    foreach ( entity weapon in victim.GetMainWeapons() )
+		{
+		attacker.GiveWeapon( weapon.GetWeaponClassName(), weapon.GetMods() )
+		}
 }
 }
 
