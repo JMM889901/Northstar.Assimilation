@@ -32,7 +32,9 @@ void function WeaponStealing_Init() {
 			SendHudMessage( player, message, -1, 0.4, 255, 0, 0, 0, 0, 3, 0.15 )
 			
 	}
-	elif (IsTitan(attacker) != 0)
+	else
+	{
+	if (attacker.IsTitan() != true)
 	{
 		if (StealWeaponsEnabled()){
 				AddTeamScore( attacker.GetTeam(), 1 )
@@ -51,6 +53,7 @@ void function WeaponStealing_Init() {
 		attacker.GiveOffhandWeapon( victim.GetOffhandWeapon( OFFHAND_LEFT ).GetWeaponClassName(), OFFHAND_LEFT )
  	    	attacker.GiveOffhandWeapon( victim.GetOffhandWeapon( OFFHAND_RIGHT ).GetWeaponClassName(), OFFHAND_RIGHT )
 		}
+	}
 }
 }
 #endif
