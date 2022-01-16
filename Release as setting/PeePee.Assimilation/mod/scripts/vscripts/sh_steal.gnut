@@ -1,14 +1,18 @@
 global function WeaponStealing_Init
-
 void function WeaponStealing_Init() {
 	AddPrivateMatchModeSettingEnum("#MODE_SETTING_CATEGORY_STEALING", "steal_abilities", ["#SETTING_DISABLED", "#SETTING_ENABLED"], "0")
 	AddPrivateMatchModeSettingEnum("#MODE_SETTING_CATEGORY_STEALING", "steal_weapons", ["#SETTING_DISABLED", "#SETTING_ENABLED"], "0")
+	AddPrivateMatchModeSettingEnum("#MODE_SETTING_CATEGORY_STEALING", "steal_health", ["#SETTING_DISABLED", "#SETTING_ENABLED"], "0")
+	AddPrivateMatchModeSettingEnum("#MODE_SETTING_CATEGORY_STEALING", "steal_titanhealth", ["#SETTING_DISABLED", "#SETTING_ENABLED"], "0")
+	AddPrivateMatchModeSettingEnum("#MODE_SETTING_CATEGORY_STEALING", "steal_speed", ["#SETTING_DISABLED", "#SETTING_ENABLED"], "0")
 
 	#if SERVER
 		AddCallback_OnPlayerKilled(StealWeapons)
 	#endif
 }
-
+struct TestStruct {
+	int pilotkills = 0
+}
 // Enabled Functions
 	bool function StealAbilitiesEnabled() {
 		return GetCurrentPlaylistVarInt("steal_abilities", 0) == 1
@@ -17,8 +21,19 @@ void function WeaponStealing_Init() {
 	bool function StealWeaponsEnabled() {
 		return GetCurrentPlaylistVarInt("steal_weapons", 0) == 1
 	}
-
+	bool function StealHealthEnabled() {
+		return GetCurrentPlaylistVarInt("steal_health", 0) == 1
+	}
+	bool function StealTitanHealthEnabled() {
+		return GetCurrentPlaylistVarInt("steal_titanhealth", 0) == 1
+	}
+	bool function SpeedOnKillEnabled() {
+		return GetCurrentPlaylistVarInt("steal_speed", 0) == 1
+	}
 #if SERVER
+	void function Connected(entity player){
+		TestStruct player
+	}
 	void function StealWeapons( entity victim, entity attacker, var damageInfo )
 	{
     if ( !victim.IsPlayer() || !attacker.IsPlayer() || GetGameState() != eGameState.Playing )
@@ -32,10 +47,12 @@ void function WeaponStealing_Init() {
 			SendHudMessage( player, message, -1, 0.4, 255, 0, 0, 0, 0, 3, 0.15 )
 			
 	}
-	else
+	else 
 	{
 	if (attacker.IsTitan() != true)
 	{
+		attacker.pilotkills = int(attacker.pilotkills) + 1
+		victim.pilotkills = 0
 		if (StealWeaponsEnabled()){
 				AddTeamScore( attacker.GetTeam(), 1 )
 				attacker.AddToPlayerGameStat( PGS_ASSAULT_SCORE, 1 )
@@ -45,13 +62,27 @@ void function WeaponStealing_Init() {
 				{
 					attacker.GiveWeapon( weapon.GetWeaponClassName(), weapon.GetMods() )
 				}
-    					}
+		}
 		if (StealAbilitiesEnabled()){
-        	foreach ( entity weapon in attacker.GetOffhandWeapons() )
+        foreach ( entity weapon in attacker.GetOffhandWeapons() )
 			attacker.TakeWeaponNow( weapon.GetWeaponClassName() )
-	    	attacker.GiveOffhandWeapon( victim.GetOffhandWeapon( OFFHAND_MELEE ).GetWeaponClassName(), OFFHAND_MELEE )
+	    attacker.GiveOffhandWeapon( victim.GetOffhandWeapon( OFFHAND_MELEE ).GetWeaponClassName(), OFFHAND_MELEE )
 		attacker.GiveOffhandWeapon( victim.GetOffhandWeapon( OFFHAND_LEFT ).GetWeaponClassName(), OFFHAND_LEFT )
- 	    	attacker.GiveOffhandWeapon( victim.GetOffhandWeapon( OFFHAND_RIGHT ).GetWeaponClassName(), OFFHAND_RIGHT )
+ 	    attacker.GiveOffhandWeapon( victim.GetOffhandWeapon( OFFHAND_RIGHT ).GetWeaponClassName(), OFFHAND_RIGHT )
+		}
+		if (StealHealthEnabled()){
+		attacker.SetMaxHealth(attacker.GetMaxHealth()+10)
+		}
+		if (SpeedOnKillEnabled()){
+			StatusEffect_AddTimed( attacker, eStatusEffect.speed_boost, 0.2*int(attacker.pilotkills), 9999, 0.1 )
+		}
+		}
+	if (attacker.IsTitan() == true){
+		if (victim.IsTitan() == true){
+			if (StealTitanHealthEnabled()){
+			attacker.SetMaxHealth(attacker.GetMaxHealth()+2500)
+			attacker.SetHealth(attacker.GetMaxHealth())
+			}
 		}
 	}
 }
