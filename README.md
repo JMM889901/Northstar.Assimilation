@@ -1,6 +1,7 @@
 Todo:
 
-make true standalone version to act as setting instead of gamemode
+Add titan v titan stealing
 
+Add pilot health stealing option
 
-remove random bits of code that do nothing because this is bascially just recycled code
+add titan health stealing option
