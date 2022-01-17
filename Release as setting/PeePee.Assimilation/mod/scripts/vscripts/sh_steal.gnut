@@ -1,3 +1,4 @@
+untyped
 global function WeaponStealing_Init
 void function WeaponStealing_Init() {
 	AddPrivateMatchModeSettingEnum("#MODE_SETTING_CATEGORY_STEALING", "steal_abilities", ["#SETTING_DISABLED", "#SETTING_ENABLED"], "0")
@@ -7,12 +8,14 @@ void function WeaponStealing_Init() {
 	AddPrivateMatchModeSettingEnum("#MODE_SETTING_CATEGORY_STEALING", "steal_speed", ["#SETTING_DISABLED", "#SETTING_ENABLED"], "0")
 
 	#if SERVER
-		AddCallback_OnPlayerKilled(StealWeapons)
+		AddCallback_OnPlayerKilled(StealWeapons);
+		AddCallback_GameStateEnter( eGameState.Playing, onstart );
+		AddCallback_OnClientConnected(Connected)
 	#endif
 }
-struct TestStruct {
-	int pilotkills = 0
-}
+struct{
+table pilotkills = {}
+} file
 // Enabled Functions
 	bool function StealAbilitiesEnabled() {
 		return GetCurrentPlaylistVarInt("steal_abilities", 0) == 1
@@ -31,8 +34,16 @@ struct TestStruct {
 		return GetCurrentPlaylistVarInt("steal_speed", 0) == 1
 	}
 #if SERVER
+	void function onstart(){
+        foreach (entity player in GetPlayerArray()){
+            file.pilotkills[(player.GetPlayerName())] <-0
+            file.pilotkills[(player.GetPlayerName())] = file.pilotkills[(player.GetPlayerName())] + 1
+            file.pilotkills[(player.GetPlayerName())] = 0
+        }
+    }
 	void function Connected(entity player){
-		TestStruct player
+		file.pilotkills[(player.GetPlayerName())] <- 0
+		print(file.pilotkills[(player.GetPlayerName())])
 	}
 	void function StealWeapons( entity victim, entity attacker, var damageInfo )
 	{
@@ -40,6 +51,7 @@ struct TestStruct {
 	{
         return
 	}
+	file.pilotkills[(victim.GetPlayerName())] = 0
 	if ( attacker == victim ) // suicide
 	{
 		string message = victim.GetPlayerName() + " committed suicide."
@@ -51,8 +63,7 @@ struct TestStruct {
 	{
 	if (attacker.IsTitan() != true)
 	{
-		attacker.pilotkills = int(attacker.pilotkills) + 1
-		victim.pilotkills = 0
+		file.pilotkills[(attacker.GetPlayerName())] = file.pilotkills[(attacker.GetPlayerName())] + 1
 		if (StealWeaponsEnabled()){
 				AddTeamScore( attacker.GetTeam(), 1 )
 				attacker.AddToPlayerGameStat( PGS_ASSAULT_SCORE, 1 )
@@ -64,17 +75,17 @@ struct TestStruct {
 				}
 		}
 		if (StealAbilitiesEnabled()){
-        foreach ( entity weapon in attacker.GetOffhandWeapons() )
+        	foreach ( entity weapon in attacker.GetOffhandWeapons() )
 			attacker.TakeWeaponNow( weapon.GetWeaponClassName() )
-	    attacker.GiveOffhandWeapon( victim.GetOffhandWeapon( OFFHAND_MELEE ).GetWeaponClassName(), OFFHAND_MELEE )
+	    	attacker.GiveOffhandWeapon( victim.GetOffhandWeapon( OFFHAND_MELEE ).GetWeaponClassName(), OFFHAND_MELEE )
 		attacker.GiveOffhandWeapon( victim.GetOffhandWeapon( OFFHAND_LEFT ).GetWeaponClassName(), OFFHAND_LEFT )
- 	    attacker.GiveOffhandWeapon( victim.GetOffhandWeapon( OFFHAND_RIGHT ).GetWeaponClassName(), OFFHAND_RIGHT )
+ 	    	attacker.GiveOffhandWeapon( victim.GetOffhandWeapon( OFFHAND_RIGHT ).GetWeaponClassName(), OFFHAND_RIGHT )
 		}
 		if (StealHealthEnabled()){
 		attacker.SetMaxHealth(attacker.GetMaxHealth()+10)
 		}
 		if (SpeedOnKillEnabled()){
-			StatusEffect_AddTimed( attacker, eStatusEffect.speed_boost, 0.2*int(attacker.pilotkills), 9999, 0.1 )
+			StatusEffect_AddTimed( attacker, eStatusEffect.speed_boost, 0.2*file.pilotkills[(attacker.GetPlayerName())], 9999, 0.1 )
 		}
 		}
 	if (attacker.IsTitan() == true){
