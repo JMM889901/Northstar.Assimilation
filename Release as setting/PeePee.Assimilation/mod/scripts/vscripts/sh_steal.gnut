@@ -6,11 +6,15 @@ void function WeaponStealing_Init() {
 	AddPrivateMatchModeSettingEnum("#MODE_SETTING_CATEGORY_STEALING", "steal_health", ["#SETTING_DISABLED", "#SETTING_ENABLED"], "0")
 	AddPrivateMatchModeSettingEnum("#MODE_SETTING_CATEGORY_STEALING", "steal_titanhealth", ["#SETTING_DISABLED", "#SETTING_ENABLED"], "0")
 	AddPrivateMatchModeSettingEnum("#MODE_SETTING_CATEGORY_STEALING", "steal_speed", ["#SETTING_DISABLED", "#SETTING_ENABLED"], "0")
+	AddPrivateMatchModeSettingEnum("#MODE_SETTING_CATEGORY_STEALING", "steal_speedfull", ["#SETTING_DISABLED", "#SETTING_ENABLED"], "0")
+	AddPrivateMatchModeSettingEnum("#MODE_SETTING_CATEGORY_STEALING", "steal_healthfull", ["#SETTING_DISABLED", "#SETTING_ENABLED"], "0")
+	AddPrivateMatchModeSettingEnum("#MODE_SETTING_CATEGORY_STEALING", "keep_speed", ["#SETTING_DISABLED", "#SETTING_ENABLED"], "0")
 
 	#if SERVER
 		AddCallback_OnPlayerKilled(StealWeapons);
 		AddCallback_GameStateEnter( eGameState.Playing, onstart );
 		AddCallback_OnClientConnected(Connected)
+		AddCallback_OnPlayerRespawned(Respawn)
 	#endif
 }
 struct{
@@ -33,7 +37,21 @@ table pilotkills = {}
 	bool function SpeedOnKillEnabled() {
 		return GetCurrentPlaylistVarInt("steal_speed", 0) == 1
 	}
+	bool function StealHealthFullEnabled() {
+		return GetCurrentPlaylistVarInt("steal_healthfull", 0) == 1
+	}
+	bool function StealSpeedFullEnabled() {
+		return GetCurrentPlaylistVarInt("steal_speedfull", 0) == 1
+	}
+	bool function KeepSpeedlEnabled() {
+		return GetCurrentPlaylistVarInt("keep_speed", 0) == 1
+	}	
 #if SERVER
+	void function Respawn(entity player){
+		if(KeepSpeedlEnabled()){
+			StatusEffect_AddTimed( player, eStatusEffect.speed_boost, 0.2*file.pilotkills[(player.GetPlayerName())], 9999, 0.1 )
+		}
+	}
 	void function onstart(){
         foreach (entity player in GetPlayerArray()){
             file.pilotkills[(player.GetPlayerName())] <-0
@@ -51,19 +69,26 @@ table pilotkills = {}
 	{
         return
 	}
-	file.pilotkills[(victim.GetPlayerName())] = 0
 	if ( attacker == victim ) // suicide
 	{
 		string message = victim.GetPlayerName() + " committed suicide."
 		foreach ( entity player in GetPlayerArray() )
 			SendHudMessage( player, message, -1, 0.4, 255, 0, 0, 0, 0, 3, 0.15 )
-			
+		if (KeepSpeedlEnabled() != true){
+			file.pilotkills[(victim.GetPlayerName())] = 0
+		}
 	}
 	else 
 	{
 	if (attacker.IsTitan() != true)
 	{
 		file.pilotkills[(attacker.GetPlayerName())] = file.pilotkills[(attacker.GetPlayerName())] + 1
+		if(StealSpeedFullEnabled()){
+			file.pilotkills[(attacker.GetPlayerName())] = file.pilotkills[(attacker.GetPlayerName())] + file.pilotkills[(victim.GetPlayerName())]
+		}
+		if (KeepSpeedlEnabled() != true){
+			file.pilotkills[(victim.GetPlayerName())] = 0
+		}
 		if (StealWeaponsEnabled()){
 				AddTeamScore( attacker.GetTeam(), 1 )
 				attacker.AddToPlayerGameStat( PGS_ASSAULT_SCORE, 1 )
