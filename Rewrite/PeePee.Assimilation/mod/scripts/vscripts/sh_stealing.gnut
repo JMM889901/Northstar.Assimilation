@@ -22,10 +22,10 @@ void function WeaponStealing_Init() {
 #if SERVER
 //functions
 void function SwapWeapons(entity victim, entity attacker){
-	foreach(entity weapon in attacker.GetMainWeapons())
-		attacker.TakeWeaponNow(weapon.GetWeaponClassName())
-	foreach(entity weapon in victim.GetMainWeapons())
-		attacker.GiveWeapon(weapon.GetWeaponClassName(), weapon.GetMods())
+	foreach(entity weapon in attacker.GetMainWeapons()){
+		attacker.TakeWeaponNow(weapon.GetWeaponClassName())}
+	foreach(entity weapon in victim.GetMainWeapons()){
+		attacker.GiveWeapon(weapon.GetWeaponClassName(), weapon.GetMods())}
 }
 void function SwapAbilities(entity victim, entity attacker){
 	foreach(entity offhand in victim.GetOffhandWeapons()){
