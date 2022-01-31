@@ -41,8 +41,10 @@ void function resetspeed(entity player){
 void function SetSpeed(entity player){
     if(player.Istitan() && !(TitanSpeedEnabled()))
          StatusEffect_StopAll( player, eStatusEffect.speed_boost )
-    else
+    else{
+        increasespeed(player, 0) //stops crashes on startup and im too lazy to make a better solution
         StatusEffect_AddTimed( player, eStatusEffect.speed_boost, 0.2*file.boosts[player], 9999, 0.1 )
+    }
 }
 //core
 void function Accelerate(entity victim, entity attacker){
