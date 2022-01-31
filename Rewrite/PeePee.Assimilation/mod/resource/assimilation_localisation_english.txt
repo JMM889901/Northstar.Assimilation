@@ -1,0 +1,17 @@
+"lang"
+{
+	"Language" "english"
+	"Tokens"
+	{
+		"MODE_SETTING_CATEGORY_STEALING" "Assimilation"
+		"steal_abilities" "Steal ability and grenade on kill"
+		"steal_weapons" "Steal weapons on kill"
+		"steal_health" "increase max health on kill"
+		"steal_titanhealth" "titans increase max health on kill"
+		"steal_speed" "Increase speed on kill"
+		"keep_speed" "Keep speedboost on death"
+		"steal_speedfull" "Steal speed on kill"
+		
+		
+	}
+}

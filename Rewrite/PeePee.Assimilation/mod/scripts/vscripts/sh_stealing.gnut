@@ -1,0 +1,53 @@
+global function WeaponStealing_Init
+void function WeaponStealing_Init() {
+	AddPrivateMatchModeSettingEnum("#MODE_SETTING_CATEGORY_STEALING", "steal_abilities", ["#SETTING_DISABLED", "#SETTING_ENABLED"], "0")
+	AddPrivateMatchModeSettingEnum("#MODE_SETTING_CATEGORY_STEALING", "steal_weapons", ["#SETTING_DISABLED", "#SETTING_ENABLED"], "0")
+	AddPrivateMatchModeSettingEnum("#MODE_SETTING_CATEGORY_STEALING", "unrestricted_stealing", ["#SETTING_DISABLED", "#SETTING_ENABLED"], "0")
+
+	#if SERVER
+		AddCallback_OnPlayerKilled(StealWeapons);
+	#endif
+}
+//bools
+	bool function StealAbilitiesEnabled() {
+		return GetCurrentPlaylistVarInt("steal_abilities", 0) == 1
+	}
+
+	bool function StealWeaponsEnabled() {
+		return GetCurrentPlaylistVarInt("steal_weapons", 0) == 1
+	}
+	bool function UnrestrictedStealingEnabled() {
+		return GetCurrentPlaylistVarInt("unrestricted_stealing", 0) == 1
+	}
+#if SERVER
+//functions
+void function SwapWeapons(entity victim, entity attacker){
+	foreach(entity weapon in attacker.GetMainWeapons())
+		attacker.TakeWeaponNow(weapon.GetWeaponClassName())
+	foreach(entity weapon in victim.GetMainWeapons())
+		attacker.GiveWeapon(weapon.GetWeaponClassName(), weapon.GetMods())
+}
+void function SwapAbilities(entity victim, entity attacker){
+	foreach(entity offhand in victim.GetOffhandWeapons()){
+		int index = victim.GetOffhandWeapons().find(offhand)
+		attacker.TakeWeaponNow(attacker.GetOffhandWeapons()[index].GetWeaponClassName())
+		attacker.GiveOffhandWeapon(offhand.GetWeaponClassName(), index)
+	}
+}
+bool function ValidSteal(entity victim, entity attacker){
+	if ( !victim.IsPlayer() || !attacker.IsPlayer() || GetGameState() != eGameState.Playing )
+		return false
+	if(attacker.IsTitan() == victim.IsTitan())
+		return true
+	if(UnrestrictedStealingEnabled() && !(attacker.IsTitan))
+		return true
+	return false
+}
+//Core
+void function StealWeapons(entity victim, entity attacker){
+	if(StealAbilitiesEnabled() && ValidSteal(victim, attacker) && !(victim.IsTitan())) //some titan abilities cause crashes sadge
+		SwapAbilities(victim, attacker)
+	if(StealWeaponsEnabled() && ValidSteal(victim, attacker))
+		SwapWeapons(victim, attacker)
+}
+#endif

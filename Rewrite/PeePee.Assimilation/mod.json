@@ -1,0 +1,35 @@
+{
+	"Name" : "Assimilate",
+	"Description" : "Assimilate",
+	"Version": "0.3.5",
+	"LoadPriority": 1,
+
+	"Scripts": [
+		{
+			"Path": "sh_stealing.gnut",
+			"RunOn": "MP",
+			"ClientCallback": {
+				"After": "WeaponStealing_Init"
+			},
+
+			"ServerCallback": {
+				"After": "WeaponStealing_Init"
+			}
+		},
+		{
+			"Path": "sh_acceleration.gnut",
+			"RunOn": "MP",
+			"ClientCallback": {
+				"After": "Acceleration_Init"
+			},
+
+			"ServerCallback": {
+				"After": "Acceleration_Init"
+			}
+		}
+	],
+
+	"Localisation": [
+		"resource/assimilation_localisation_%language%.txt"
+	]
+}
