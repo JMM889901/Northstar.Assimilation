@@ -1,3 +1,5 @@
+Merged into mutator pack
+
 Todo:
 
 Add titan v titan stealing
